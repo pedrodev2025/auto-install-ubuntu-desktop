@@ -1,0 +1,39 @@
+# autoinstall.yaml
+version: 1
+identity:
+  hostname: ubuntu-desktop
+  username: admin
+  password: "$y$j9T$.WAcMThRFOKF8V9o9ngXr0$Gt7anOsz.TvrmcJhSUMf0mmU7iORcm0Qukbs1QrbHp5" # a senha e 123
+locale: pt_BR.UTF-8
+keyboard:
+  layout: br
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+storage:
+  layout:
+    name: direct
+ssh:
+  install-server: true
+  allow-pw: true
+packages:
+  - openssh-client
+  - wget
+  - flatpak
+  - plasma-desktop
+  - curl
+  - sddm # Adicione esta linha
+# ...
+late-commands:
+  # remove o gnome e o gdm
+  - chroot /target apt purge gnome gdm -y --autoremove
+  # remove o gdm para evitar conflitos se nao for desinstalado pelo purge acima
+  - chroot /target systemctl disable gdm --now || true
+  - chroot /target systemctl enable sddm --now
+  # inicia o script de pós instalação do ubuntu(feito por mim)
+  - chroot /target export SUDO_USER=admin && curl https://raw.githubusercontent.com/pedrodev2025/Script-de-p-s-instala-o-do-Ubuntu-/refs/heads/main/installer.sh | bash
+  # Configura o KDE Plasma como ambiente padrão (pode não ser necessário se o SDDM fizer a seleção)
+  # - echo "exec startkde" > /target/home/admin/.xinitrc
+  # - chroot /target chown admin:admin /home/admin/.xinitrc
